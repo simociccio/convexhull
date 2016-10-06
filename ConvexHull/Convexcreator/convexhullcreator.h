@@ -18,6 +18,7 @@ private:
     void randomfour();
     bool circleControll() const;
     void tethraCreation();
+    std::vector<Dcel::Face*> addNewFace(std::list<Dcel::HalfEdge*>,Dcel::Vertex*);
 
 
     //variables

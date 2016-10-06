@@ -17,7 +17,7 @@ void convexhullCreator::hullcreator(){
     randomfour();
     this->dcel->reset();
     tethraCreation();
-
+    std::cout<<"debug";
 
 }
 
@@ -71,6 +71,10 @@ bool convexhullCreator::circleControll() const{
 
 }
 void convexhullCreator::tethraCreation(){
+
+    //create list of pointer of halfedges
+    std::list<Dcel::HalfEdge*> listHe;
+
     //add first 4 points to the dcel
     Dcel::Vertex* v1 = dcel->addVertex(vectorPoint[0]);
     Dcel::Vertex* v2 = dcel->addVertex(vectorPoint[1]);
@@ -121,6 +125,67 @@ void convexhullCreator::tethraCreation(){
         v1->incrementCardinality();
         he3->setFace(f1);
 
+        listHe.push_back(he1);
+        listHe.push_back(he2);
+        listHe.push_back(he3);
+
+        addNewFace(listHe,v4);
+
+}
+
+std::vector<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>listHe,Dcel::Vertex* v3){
+
+    std::vector<Dcel::Face*> newFace=std::vector<Dcel::Face* >(listHe.size());
+
+    int i=0;
+    for(auto iter = listHe.begin(); iter != listHe.end(); ++iter,i++){
+        Dcel::HalfEdge* listHalfedge = *iter;
+
+        Dcel::HalfEdge* he1 = dcel->addHalfEdge();
+        Dcel::HalfEdge* he2 = dcel->addHalfEdge();
+        Dcel::HalfEdge* he3 = dcel->addHalfEdge();
+
+        Dcel::Vertex* v1 = listHalfedge->getToVertex();
+        Dcel::Vertex* v2 = listHalfedge->getFromVertex();
+
+        //current face creation
+        Dcel::Face* cf = dcel->addFace();
+        cf->setOuterHalfEdge(he1);
+        newFace[i]=cf;
+
+
+        he1->setFromVertex(v1);
+        he1->setToVertex(v2);
+        he1->setNext(he2);
+        he1->setPrev(he3);
+        v1->setIncidentHalfEdge(he1);
+        v1->incrementCardinality();
+        v2->incrementCardinality();
+        he1->setFace(cf);
+
+
+        he2->setFromVertex(v2);
+        he2->setToVertex(v3);
+        he2->setNext(he3);
+        he2->setPrev(he1);
+        v2->setIncidentHalfEdge(he2);
+        v2->incrementCardinality();
+        v3->incrementCardinality();
+        he2->setFace(cf);
+
+
+
+        he3->setFromVertex(v3);
+        he3->setToVertex(v1);
+        he3->setNext(he1);
+        he3->setPrev(he2);
+        v3->setIncidentHalfEdge(he3);
+        v3->incrementCardinality();
+        v1->incrementCardinality();
+        he3->setFace(cf);
+
+    }
+    return newFace;
 }
 
 
