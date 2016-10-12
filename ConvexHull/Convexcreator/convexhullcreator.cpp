@@ -86,6 +86,8 @@ void convexhullCreator::tethraCreation(){
     Dcel::HalfEdge* he2 = dcel->addHalfEdge();
     Dcel::HalfEdge* he3 = dcel->addHalfEdge();
 
+
+
     //crete face triangle
     Dcel::Face* f1 = dcel->addFace();
     f1->setOuterHalfEdge(he1);
@@ -133,59 +135,70 @@ void convexhullCreator::tethraCreation(){
 
 }
 
-std::vector<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>listHe,Dcel::Vertex* v3){
+void convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>listHe,Dcel::Vertex* vi){
 
-    std::vector<Dcel::Face*> newFace=std::vector<Dcel::Face* >(listHe.size());
-
+    std::vector<Dcel::HalfEdge*> hen = std::vector<Dcel::HalfEdge*>(listHe.size());
+    std::vector<Dcel::HalfEdge*> hex = std::vector<Dcel::HalfEdge*>(listHe.size());
     int i=0;
     for(auto iter = listHe.begin(); iter != listHe.end(); ++iter,i++){
-        Dcel::HalfEdge* listHalfedge = *iter;
 
         Dcel::HalfEdge* he1 = dcel->addHalfEdge();
         Dcel::HalfEdge* he2 = dcel->addHalfEdge();
         Dcel::HalfEdge* he3 = dcel->addHalfEdge();
 
-        Dcel::Vertex* v1 = listHalfedge->getToVertex();
-        Dcel::Vertex* v2 = listHalfedge->getFromVertex();
+        //uso l'he puntato da iter per salvarmi il vertice di partenza e arrivo
+        Dcel::Vertex* v1 = (*iter)->getToVertex();
+        Dcel::Vertex* v2 = (*iter)->getFromVertex();
 
-        //current face creation
+        //creazione faccia
         Dcel::Face* cf = dcel->addFace();
         cf->setOuterHalfEdge(he1);
-        newFace[i]=cf;
-
-
         he1->setFromVertex(v1);
         he1->setToVertex(v2);
         he1->setNext(he2);
         he1->setPrev(he3);
+        he1->setTwin(*iter);
+        (*iter)->setTwin(he1);
         v1->setIncidentHalfEdge(he1);
         v1->incrementCardinality();
         v2->incrementCardinality();
         he1->setFace(cf);
 
-
         he2->setFromVertex(v2);
-        he2->setToVertex(v3);
+        he2->setToVertex(vi);
         he2->setNext(he3);
         he2->setPrev(he1);
         v2->setIncidentHalfEdge(he2);
         v2->incrementCardinality();
-        v3->incrementCardinality();
+        vi->incrementCardinality();
         he2->setFace(cf);
 
-
-
-        he3->setFromVertex(v3);
+        he3->setFromVertex(vi);
         he3->setToVertex(v1);
         he3->setNext(he1);
         he3->setPrev(he2);
-        v3->setIncidentHalfEdge(he3);
-        v3->incrementCardinality();
+        vi->setIncidentHalfEdge(he3);
+        vi->incrementCardinality();
         v1->incrementCardinality();
         he3->setFace(cf);
+        hen[i]=he3;
+        hex[i]=he2;
+        }
 
-    }
-    return newFace;
+    setTwins(hen,hex,i);
+
+}
+//questa funzione setta i twin in maniera tale che scorrendo il for i twin seguano il ciclo e uscendo dal for concludo il ciclo in
+//modo che l'ultimo he punti al primo
+void convexhullCreator::setTwins(std::vector<Dcel::HalfEdge*> hen,std::vector<Dcel::HalfEdge*> hex,int i){
+    int j;
+    for(j=0;j<i-1;j++){
+        hen[j]->setTwin(hex[j+1]);
+        hex[j+1]->setTwin(hen[j]);
+       }
+    hen[i-1]->setTwin(hex[0]);
+    hex[0]->setTwin(hen[i-1]);
+
 }
 
 
