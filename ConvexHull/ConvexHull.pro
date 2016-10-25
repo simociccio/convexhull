@@ -52,7 +52,7 @@ HEADERS += \
     lib/common/pickable_object.h \
     lib/timer.h \
     Convexcreator/convexhullcreator.h \
-    Convexcreator/conflictlist.h
+    Convexcreator/conflictgraph.h
 
 SOURCES += \
     GUI/managers/dcelmanager.cpp \
@@ -68,7 +68,7 @@ SOURCES += \
     common.cpp \
     main.cpp \
     Convexcreator/convexhullcreator.cpp \
-    Convexcreator/conflictlist.cpp
+    Convexcreator/conflictgraph.cpp
 
 FORMS += \
     GUI/managers/dcelmanager.ui \

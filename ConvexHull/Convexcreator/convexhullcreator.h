@@ -19,12 +19,12 @@ private:
     bool circleControll() const;
     void tethraCreation();
     void setTwins(std::vector<Dcel::HalfEdge*>,std::vector<Dcel::HalfEdge*>,int);
-    void addNewFace(std::list<Dcel::HalfEdge*>,Dcel::Vertex*);
+    std::list<Dcel::Face*> addNewFace(std::list<Dcel::HalfEdge*>,Dcel::Vertex*);
 
 
     //variables
     int npoints;
-    std::vector<Pointd> vectorPoint;
+    std::vector<Dcel::Vertex> vectorPoint;
     DrawableDcel *dcel;
 };
 
