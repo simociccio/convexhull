@@ -12,10 +12,18 @@ class conflictgraph
 {
 public:
     conflictgraph(DrawableDcel* dcel, std::vector<Dcel::Vertex*> &vectorPoint);
-    void addFaceToVertex(Dcel::Vertex*, Dcel::Face*);
-    void addVertexToFace(Dcel::Face*, Dcel::Vertex*);
+    void addFaceToVertexList(Dcel::Vertex*, Dcel::Face*);
+    void addVertexToFaceList(Dcel::Face*, Dcel::Vertex*);
     std::set<Dcel::Face*>* isVisibleByV(Dcel::Vertex*);
     std::set<Dcel::Vertex*>* isVisibleByF(Dcel::Face*);
+    void removeVertex(std::set<Dcel::Vertex*>*);
+    void removeFaces(Dcel::Face*);
+    void updateCg(std::set<Dcel::Vertex*> *,Dcel::Face* );
+
+    std::map<Dcel::Vertex*,std::set<Dcel::Face*>*> maptoface;
+    std::map<Dcel::Face*,std::set<Dcel::Vertex*>*> maptover;
+
+
 
     void createGraph();
 
@@ -23,8 +31,7 @@ private:
     //variables
     std::vector<Dcel::Vertex*> vectorPoint;
     DrawableDcel *dcel;
-    std::map<Dcel::Vertex*,std::set<Dcel::Face*>*> maptoface;
-    std::map<Dcel::Face*,std::set<Dcel::Vertex*>*> maptover;
+
 
 };
 

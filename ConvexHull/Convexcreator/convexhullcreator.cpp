@@ -1,4 +1,5 @@
 #include "convexhullcreator.h"
+#include "conflictgraph.h"
 #include <stdlib.h>
 #include <iostream>
 #include <algorithm>    // std::shuffle
@@ -9,7 +10,7 @@
 convexhullCreator::convexhullCreator(DrawableDcel* dcel){
    this->dcel=dcel;
    this->npoints=dcel->getNumberVertices();
-   this->vectorPoint=std::vector<Dcel::Vertex>(npoints);
+   this->vectorPoint=std::vector<Dcel::Vertex*>(npoints);
 
 }
 void convexhullCreator::hullcreator(){
@@ -18,6 +19,21 @@ void convexhullCreator::hullcreator(){
     this->dcel->reset();
     tethraCreation();
     std::cout<<"debug";
+    conflictgraph confg = conflictgraph(this->dcel,this->vectorPoint);
+    confg.createGraph();
+    std::cout<<"debug";
+    for(int i=4; i<npoints; i++){
+        std::list<Dcel::HalfEdge*> listHorizon;
+        Dcel::Vertex* point = vectorPoint[i];
+
+        std::set<Dcel::Face*>* isVisiblebyF=confg.isVisibleByF(point);
+
+        if(isVisiblebyF->size()>0){
+
+        }
+
+
+    }
 
 }
 
@@ -32,9 +48,9 @@ void convexhullCreator::randomfour(){
           //check if the first point are coplanar
           Eigen::Matrix4d matrix;
           for(int i=0; i<4; i++){
-              matrix(i, 0) = vectorPoint[i].getCoordinate().x();
-              matrix(i, 1) = vectorPoint[i].getCoordinate().y();
-              matrix(i, 2) = vectorPoint[i].getCoordinate().z();
+              matrix(i, 0) = vectorPoint[i]->getCoordinate().x();
+              matrix(i, 1) = vectorPoint[i]->getCoordinate().y();
+              matrix(i, 2) = vectorPoint[i]->getCoordinate().z();
               matrix(i, 3) = 1;
           }
 
@@ -53,9 +69,9 @@ void convexhullCreator::randomfour(){
 bool convexhullCreator::circleControll() const{
     Eigen::Matrix4d matrix;
     for(int i=0; i<4; i++){
-        matrix(i, 0) = vectorPoint[i].getCoordinate().x();
-        matrix(i, 1) = vectorPoint[i].getCoordinate().y();
-        matrix(i, 2) = vectorPoint[i].getCoordinate().z();
+        matrix(i, 0) = this->vectorPoint[i]->getCoordinate().x();
+        matrix(i, 1) = this->vectorPoint[i]->getCoordinate().y();
+        matrix(i, 2) = this->vectorPoint[i]->getCoordinate().z();
         matrix(i, 3) = 1;
     }
     double det = matrix.determinant();
@@ -77,10 +93,10 @@ void convexhullCreator::tethraCreation(){
     std::list<Dcel::Face*> face;
 
     //add first 4 points to the dcel
-    Dcel::Vertex* v1 = dcel->addVertex(vectorPoint[0]);
-    Dcel::Vertex* v2 = dcel->addVertex(vectorPoint[1]);
-    Dcel::Vertex* v3 = dcel->addVertex(vectorPoint[2]);
-    Dcel::Vertex* v4 = dcel->addVertex(vectorPoint[3]);
+    Dcel::Vertex* v1 = this->dcel->addVertex(this->vectorPoint[0]->getCoordinate());
+    Dcel::Vertex* v2 = this->dcel->addVertex(this->vectorPoint[1]->getCoordinate());
+    Dcel::Vertex* v3 = this->dcel->addVertex(this->vectorPoint[2]->getCoordinate());
+    Dcel::Vertex* v4 = this->dcel->addVertex(this->vectorPoint[3]->getCoordinate());
 
     //create the 3 triangle halfedges
     Dcel::HalfEdge* he1 = dcel->addHalfEdge();
@@ -192,15 +208,14 @@ std::list<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>l
     return Face;
 
 }
-std::set<Dcel::HalfEdge*> convexhullCreator::setHorizon(std::list<Dcel::Face> Face){
+std::set<Dcel::HalfEdge*> convexhullCreator::setHorizon(std::set<Dcel::Face*> *face){
     Dcel::HalfEdge* twin;
-    std::list<Dcel::HalfEdge*> hev = std::list<Dcel::HalfEdge*>;
-    std::list<Dcel::HalfEdge*> heSorted = std::list<Dcel::HalfEdge*>;
-
-    for(auto iter=Face->faceBegin(); iter!=Face->faceEnd();++iter){
+    std::list<Dcel::HalfEdge*> hev;
+    std::list<Dcel::HalfEdge*> heSorted;
+    for(auto iter=face->begin();iter!=face->end();++iter){
         twin=(*iter)->getOuterHalfEdge()->getTwin();
         for(int i =0 ; i<3 ; i++){
-            if(isVisibleByV()->count(twin->getFace())){
+            if(face->count(twin->getFace())){
                 hev.push_back(twin);
                 break;
              }
@@ -208,35 +223,34 @@ std::set<Dcel::HalfEdge*> convexhullCreator::setHorizon(std::list<Dcel::Face> Fa
         }
 
     }
-    heSorted=horizonSort(hev);
+    return horizonSort(hev);
 
 
 }
-std::list<Dcel::HalfEdge*> convexhullCreator::horizonSort(std::list<Dcel::HalfEdge*> he){
+std::set<Dcel::HalfEdge*> convexhullCreator::horizonSort(std::list<Dcel::HalfEdge *> he){
     Dcel::Vertex* fromCurrentHe;
-    Dcel::Vertex* toCurrentHe;
 
-    std::list<Dcel::HalfEdge*> sortedSet = std::list<Dcel::HalfEdge*>;
+    std::set<Dcel::HalfEdge*> sortedSet;
 
     for(auto iter=he.begin(); iter!=he.end(); ++iter){
 
         if(iter==he.begin()){
             fromCurrentHe=(*iter)->getToVertex();
-            sortedSet->insert(*iter);
+            sortedSet.insert(*iter);
             he.remove(*iter);
         }
         else{
-            auto lastEl = sortedSet.rebegin();
+            auto lastEl = sortedSet.rbegin();
             fromCurrentHe=(*lastEl)->getToVertex();;
             he.remove(*lastEl);
             if(he.size()==1){
-                sortedSet->insert(*lastEl);
+                sortedSet.insert(*lastEl);
                 return sortedSet;
             }
         }
         for(auto iter1=he.begin(); iter1!=he.end(); ++iter1){
-          if(fromCurrentHe==(*iter1)->getfromVertex()){
-              sortedSet->insert(*iter1);
+          if(fromCurrentHe==(*iter1)->getFromVertex()){
+              sortedSet.insert(*iter1);
           }
 
         }
@@ -256,14 +270,11 @@ void convexhullCreator::setTwins(std::vector<Dcel::HalfEdge*> hen,std::vector<Dc
 
 }
 
-
-
-
 void convexhullCreator::findVertices(){
     Dcel::VertexIterator iter;
     int i=0;
     for(iter = dcel->vertexBegin(); iter != dcel-> vertexEnd(); ++iter){
-        this->vectorPoint[i]=(*iter)->getCoordinate();
+        this->vectorPoint[i]=(*iter);
         i++;
     }
 }

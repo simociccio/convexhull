@@ -18,13 +18,15 @@ private:
     void randomfour();
     bool circleControll() const;
     void tethraCreation();
+    std::set<Dcel::HalfEdge *> horizonSort(std::list<Dcel::HalfEdge *>);
+    std::set<Dcel::HalfEdge*> setHorizon(std::set<Dcel::Face *> *);
     void setTwins(std::vector<Dcel::HalfEdge*>,std::vector<Dcel::HalfEdge*>,int);
     std::list<Dcel::Face*> addNewFace(std::list<Dcel::HalfEdge*>,Dcel::Vertex*);
 
 
     //variables
     int npoints;
-    std::vector<Dcel::Vertex> vectorPoint;
+    std::vector<Dcel::Vertex*> vectorPoint;
     DrawableDcel *dcel;
 };
 
