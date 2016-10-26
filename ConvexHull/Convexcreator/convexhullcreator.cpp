@@ -26,9 +26,9 @@ void convexhullCreator::hullcreator(){
         std::list<Dcel::HalfEdge*> listHorizon;
         Dcel::Vertex* point = vectorPoint[i];
 
-        std::set<Dcel::Face*>* isVisiblebyF=confg.isVisibleByF(point);
+        std::set<Dcel::Face*>* isVisiblebyV=confg.isVisibleByV(point);
 
-        if(isVisiblebyF->size()>0){
+        if(isVisiblebyV->size()>0){
 
         }
 

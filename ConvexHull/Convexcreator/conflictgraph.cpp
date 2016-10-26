@@ -16,7 +16,7 @@ void conflictgraph::createGraph(){
 
         int i=0;
 
-        for(auto vertexit = (*iter)->incidentVertexBegin();vertexit!=(*iter)->incidentVertexEnd();++vertexit,i++){
+        for(auto vertexit = (*iter)->incidentVertexBegin();vertexit!=(*iter)->incidentVertexEnd() && i<3;++vertexit,i++){
 
             matrix(i, 0) = (*vertexit)->getCoordinate().x();
             matrix(i, 1) = (*vertexit)->getCoordinate().y();
@@ -117,12 +117,12 @@ void conflictgraph::updateCg(std::set<Dcel::Vertex*> *vertex,Dcel::Face* face){
 
 Eigen::Matrix4d matrix;
     for(auto iter=vertex->begin();iter!=vertex->end();++iter){
-        int i;
-        for(auto vertexit = *(face->incidentVertexBegin());vertexit!=*(face->incidentVertexEnd());++vertexit,i++){
+        int i=0;
+        for(auto vertexit = face->incidentVertexBegin();vertexit!=face->incidentVertexEnd();++vertexit,i++){
 
-            matrix(i, 0) = (*vertexit).getCoordinate().x();
-            matrix(i, 1) = (*vertexit).getCoordinate().y();
-            matrix(i, 2) = (*vertexit).getCoordinate().z();
+            matrix(i, 0) = (*vertexit)->getCoordinate().x();
+            matrix(i, 1) = (*vertexit)->getCoordinate().y();
+            matrix(i, 2) = (*vertexit)->getCoordinate().z();
             matrix(i, 3) = 1;
 
 
