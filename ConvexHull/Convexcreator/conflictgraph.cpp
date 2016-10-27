@@ -113,27 +113,41 @@ void conflictgraph::removeFaces(Dcel::Face* face){
     }
     maptover.erase(face);
 }
+
+std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> conflictgraph::visibleVertexToTest(std::list<Dcel::HalfEdge*> *listHoriz){
+
+    std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> mapHV;
+    for(auto iter = listHoriz->begin();iter!=listHoriz->end();++iter){
+        //std::set<Dcel::Vertex*>* totalV=new std::set<Dcel::Vertex*>();
+        std::set<Dcel::Vertex*> *confv=isVisibleByF((*iter)->getFace());
+        std::set<Dcel::Vertex*> *confvt=isVisibleByF((*iter)->getTwin()->getFace());
+        //totalV->insert(confv->begin(),confv->end());
+        confv->insert(confvt->begin(),confvt->end());
+        mapHV[*iter]=confv;
+    }
+    return mapHV;
+
+}
+
 void conflictgraph::updateCg(std::set<Dcel::Vertex*> *vertex,Dcel::Face* face){
 
 Eigen::Matrix4d matrix;
     for(auto iter=vertex->begin();iter!=vertex->end();++iter){
         int i=0;
         for(auto vertexit = face->incidentVertexBegin();vertexit!=face->incidentVertexEnd();++vertexit,i++){
-
-            matrix(i, 0) = (*vertexit)->getCoordinate().x();
-            matrix(i, 1) = (*vertexit)->getCoordinate().y();
-            matrix(i, 2) = (*vertexit)->getCoordinate().z();
-            matrix(i, 3) = 1;
-
+            if(i==3){
+                matrix(3, 0) = (*iter)->getCoordinate().x();
+                matrix(3, 1) = (*iter)->getCoordinate().y();
+                matrix(3, 2) = (*iter)->getCoordinate().z();
+                matrix(3, 3) = 1;
+            }else{
+                matrix(i, 0) = (*vertexit)->getCoordinate().x();
+                matrix(i, 1) = (*vertexit)->getCoordinate().y();
+                matrix(i, 2) = (*vertexit)->getCoordinate().z();
+                matrix(i, 3) = 1;
+            }
 
         }
-
-        for(unsigned int i=4;i<vectorPoint.size();i++){
-
-            matrix(3, 0) = (*iter)->getCoordinate().x();
-            matrix(3, 1) = (*iter)->getCoordinate().y();
-            matrix(3, 2) = (*iter)->getCoordinate().z();
-            matrix(3, 3) = 1;
             double det = matrix.determinant();
             if(det < -std::numeric_limits<double>::epsilon()){
                 addFaceToVertexList((*iter),face);
@@ -141,8 +155,8 @@ Eigen::Matrix4d matrix;
             }
 
         }
-    }
 }
+
 
 
 

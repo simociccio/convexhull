@@ -22,15 +22,15 @@ void convexhullCreator::hullcreator(){
     conflictgraph confg = conflictgraph(this->dcel,this->vectorPoint);
     confg.createGraph();
     std::cout<<"debug";
-    for(int i=4; i<npoints; i++){
-        std::list<Dcel::HalfEdge*> listHorizon;
-        Dcel::Vertex* point = vectorPoint[i];
+    for(int i=4; i<5; i++){
+        std::list<Dcel::HalfEdge*> SortHorizon;
+        std::set<Dcel::Face*>* setFace=confg.isVisibleByV(vectorPoint[i]);
 
-        std::set<Dcel::Face*>* isVisiblebyV=confg.isVisibleByV(point);
+        if(setFace->size()>0){
+            SortHorizon=setHorizon(setFace);
+            std::cout<<"debug";
 
-        if(isVisiblebyV->size()>0){
-
-        }
+       }
 
 
     }
@@ -208,18 +208,19 @@ std::list<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>l
     return Face;
 
 }
-std::set<Dcel::HalfEdge*> convexhullCreator::setHorizon(std::set<Dcel::Face*> *face){
-    Dcel::HalfEdge* twin;
+std::list<Dcel::HalfEdge*> convexhullCreator::setHorizon(std::set<Dcel::Face*> *faceList){
+    Dcel::HalfEdge* twin,*outerHe;
     std::list<Dcel::HalfEdge*> hev;
-    std::list<Dcel::HalfEdge*> heSorted;
-    for(auto iter=face->begin();iter!=face->end();++iter){
-        twin=(*iter)->getOuterHalfEdge()->getTwin();
+    for(auto iter=faceList->begin();iter!=faceList->end();++iter){
+        outerHe=(*iter)->getOuterHalfEdge();
+        twin=outerHe->getTwin();
         for(int i =0 ; i<3 ; i++){
-            if(face->count(twin->getFace())){
+            if(faceList->count(twin->getFace())<1){
                 hev.push_back(twin);
-                break;
              }
-            twin=(*iter)->getOuterHalfEdge()->getNext()->getTwin();
+            outerHe = outerHe->getNext();
+            twin=outerHe->getTwin();
+
         }
 
     }
@@ -227,30 +228,29 @@ std::set<Dcel::HalfEdge*> convexhullCreator::setHorizon(std::set<Dcel::Face*> *f
 
 
 }
-std::set<Dcel::HalfEdge*> convexhullCreator::horizonSort(std::list<Dcel::HalfEdge *> he){
+std::list<Dcel::HalfEdge*> convexhullCreator::horizonSort(std::list<Dcel::HalfEdge *> he){
     Dcel::Vertex* fromCurrentHe;
 
-    std::set<Dcel::HalfEdge*> sortedSet;
+    std::list<Dcel::HalfEdge*> sortedSet;
 
     for(auto iter=he.begin(); iter!=he.end(); ++iter){
 
         if(iter==he.begin()){
             fromCurrentHe=(*iter)->getToVertex();
-            sortedSet.insert(*iter);
+            sortedSet.push_back(*iter);
             he.remove(*iter);
         }
         else{
             auto lastEl = sortedSet.rbegin();
             fromCurrentHe=(*lastEl)->getToVertex();;
             he.remove(*lastEl);
-            if(he.size()==1){
-                sortedSet.insert(*lastEl);
+            if(he.size()==0){
                 return sortedSet;
             }
         }
         for(auto iter1=he.begin(); iter1!=he.end(); ++iter1){
           if(fromCurrentHe==(*iter1)->getFromVertex()){
-              sortedSet.insert(*iter1);
+              sortedSet.push_back(*iter1);
           }
 
         }

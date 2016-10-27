@@ -19,6 +19,8 @@ public:
     void removeVertex(std::set<Dcel::Vertex*>*);
     void removeFaces(Dcel::Face*);
     void updateCg(std::set<Dcel::Vertex*> *,Dcel::Face* );
+    std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> visibleVertexToTest(std::list<Dcel::HalfEdge*>*);
+
 
     std::map<Dcel::Vertex*,std::set<Dcel::Face*>*> maptoface;
     std::map<Dcel::Face*,std::set<Dcel::Vertex*>*> maptover;
