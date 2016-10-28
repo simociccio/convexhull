@@ -16,10 +16,10 @@ public:
     void addVertexToFaceList(Dcel::Face*, Dcel::Vertex*);
     std::set<Dcel::Face*>* isVisibleByV(Dcel::Vertex*);
     std::set<Dcel::Vertex*>* isVisibleByF(Dcel::Face*);
-    void removeVertex(std::set<Dcel::Vertex*>*);
-    void removeFaces(Dcel::Face*);
+    void removeVertex(Dcel::Vertex*);
+    void removeFaces(std::set<Dcel::Face*>*setFaces);
     void updateCg(std::set<Dcel::Vertex*> *,Dcel::Face* );
-    std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> visibleVertexToTest(std::list<Dcel::HalfEdge*>*);
+    std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> visibleVertexToTest(std::list<Dcel::HalfEdge *>);
 
 
     std::map<Dcel::Vertex*,std::set<Dcel::Face*>*> maptoface;
@@ -33,6 +33,7 @@ private:
     //variables
     std::vector<Dcel::Vertex*> vectorPoint;
     DrawableDcel *dcel;
+    int npoints;
 
 
 };

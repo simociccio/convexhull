@@ -13,29 +13,87 @@ convexhullCreator::convexhullCreator(DrawableDcel* dcel){
    this->vectorPoint=std::vector<Dcel::Vertex*>(npoints);
 
 }
+
 void convexhullCreator::hullcreator(){
     findVertices();
+
     randomfour();
+
     this->dcel->reset();
+
     tethraCreation();
+
     std::cout<<"debug";
+
     conflictgraph confg = conflictgraph(this->dcel,this->vectorPoint);
+
     confg.createGraph();
+
     std::cout<<"debug";
-    for(int i=4; i<5; i++){
-        std::list<Dcel::HalfEdge*> SortHorizon;
+    int cont =0;
+    for(int i=4; i<npoints; i++){
+        std::list<Dcel::HalfEdge*> sortHorizon;
         std::set<Dcel::Face*>* setFace=confg.isVisibleByV(vectorPoint[i]);
 
         if(setFace->size()>0){
-            SortHorizon=setHorizon(setFace);
-            std::cout<<"debug";
+            cont++;
+
+            sortHorizon=setHorizon(setFace);
+
+            std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> visibleVertex=confg.visibleVertexToTest(sortHorizon);
+
+
+
+            Dcel::Vertex* currentV = dcel->addVertex(vectorPoint[i]->getCoordinate());
+
+
+            std::deque<Dcel::Face*> newFace = addNewFace(sortHorizon,currentV);
+            confg.removeFaces(setFace);
+            delFacesVisib(setFace);
+            //aggiorno il CG
+            uint j=0;
+            for(auto iter=sortHorizon.begin();iter!=sortHorizon.end();++iter,j++){
+                std::set<Dcel::Vertex*>* vertexToIns=visibleVertex[*iter];
+                confg.updateCg(vertexToIns,newFace[j]);
+            }
+            //this->dcel->update();
+            //mainWindow->updateGlCanvas();
+
 
        }
 
+        confg.removeVertex(vectorPoint[i]);
 
     }
 
+
+    std::cout<<"fine";
+
+
 }
+
+
+
+bool convexhullCreator::circleControll() const{
+    Eigen::Matrix4d matrix;
+    for(int i=0; i<4; i++){
+        matrix(i, 0) = this->vectorPoint[i]->getCoordinate().x();
+        matrix(i, 1) = this->vectorPoint[i]->getCoordinate().y();
+        matrix(i, 2) = this->vectorPoint[i]->getCoordinate().z();
+        matrix(i, 3) = 1;
+    }
+    double det = matrix.determinant();
+
+    //check of the positivity of the determinant
+    bool pos = det > std::numeric_limits<double>::epsilon() || det < -std::numeric_limits<double>::epsilon();
+    if(pos){
+        return false;
+    }else{
+        return true;
+    }
+
+}
+
 
 void convexhullCreator::randomfour(){
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -65,27 +123,6 @@ void convexhullCreator::randomfour(){
       } while(coplanar);
 
   }
-
-bool convexhullCreator::circleControll() const{
-    Eigen::Matrix4d matrix;
-    for(int i=0; i<4; i++){
-        matrix(i, 0) = this->vectorPoint[i]->getCoordinate().x();
-        matrix(i, 1) = this->vectorPoint[i]->getCoordinate().y();
-        matrix(i, 2) = this->vectorPoint[i]->getCoordinate().z();
-        matrix(i, 3) = 1;
-    }
-    double det = matrix.determinant();
-
-    //check of the positivity of the determinant
-    bool pos = det < -std::numeric_limits<double>::epsilon();
-    if(pos){
-        return false;
-    }else{
-        return true;
-    }
-
-
-}
 void convexhullCreator::tethraCreation(){
 
     //create list of pointer of halfedges
@@ -152,11 +189,11 @@ void convexhullCreator::tethraCreation(){
 
 }
 
-std::list<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>listHe,Dcel::Vertex* vi){
+std::deque<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>listHe,Dcel::Vertex* vi){
 
     std::vector<Dcel::HalfEdge*> hen = std::vector<Dcel::HalfEdge*>(listHe.size());
     std::vector<Dcel::HalfEdge*> hex = std::vector<Dcel::HalfEdge*>(listHe.size());
-    std::list<Dcel::Face*> Face;
+    std::deque<Dcel::Face*> faceDeq;
     int i=0;
     for(auto iter = listHe.begin(); iter != listHe.end(); ++iter,i++){
 
@@ -170,7 +207,7 @@ std::list<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>l
 
         //creazione faccia
         Dcel::Face* cf = dcel->addFace();
-        Face.push_back(cf);
+        faceDeq.push_back(cf);
         cf->setOuterHalfEdge(he1);
         he1->setFromVertex(v1);
         he1->setToVertex(v2);
@@ -205,7 +242,7 @@ std::list<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>l
         }
 
     setTwins(hen,hex,i);
-    return Face;
+    return faceDeq;
 
 }
 std::list<Dcel::HalfEdge*> convexhullCreator::setHorizon(std::set<Dcel::Face*> *faceList){
@@ -232,10 +269,10 @@ std::list<Dcel::HalfEdge*> convexhullCreator::horizonSort(std::list<Dcel::HalfEd
     Dcel::Vertex* fromCurrentHe;
 
     std::list<Dcel::HalfEdge*> sortedSet;
+    int i =1;
+    for(auto iter=he.begin(); iter!=he.end(); ++iter,i++){
 
-    for(auto iter=he.begin(); iter!=he.end(); ++iter){
-
-        if(iter==he.begin()){
+        if(i==1){
             fromCurrentHe=(*iter)->getToVertex();
             sortedSet.push_back(*iter);
             he.remove(*iter);
@@ -271,10 +308,33 @@ void convexhullCreator::setTwins(std::vector<Dcel::HalfEdge*> hen,std::vector<Dc
 }
 
 void convexhullCreator::findVertices(){
-    Dcel::VertexIterator iter;
-    int i=0;
-    for(iter = dcel->vertexBegin(); iter != dcel-> vertexEnd(); ++iter){
-        this->vectorPoint[i]=(*iter);
-        i++;
+    std::vector<Dcel::Vertex*>::iterator vectIt = vectorPoint.begin();
+        for(Dcel::VertexIterator vit = dcel->vertexBegin(); vit != dcel->vertexEnd(); ++vit,++vectIt){
+            *vectIt = new Dcel::Vertex(**vit);
+        }
+}
+
+void convexhullCreator::delFacesVisib(std::set<Dcel::Face*>* setFace){
+    for(auto iter=setFace->begin();iter!=setFace->end();++iter){
+        for(auto iterh=(*iter)->incidentHalfEdgeBegin(); iterh!=(*iter)->incidentHalfEdgeEnd();++iterh){
+
+            //devo prendere i vertici in modo da poterne controllare la cardinalità per ogni singolo HE della faccia
+
+            Dcel::Vertex* getFrom = (*iterh)->getFromVertex();
+            Dcel::Vertex* getTo = (*iterh)->getToVertex();
+
+            this->dcel->deleteHalfEdge(*iterh);
+            getFrom->decrementCardinality();
+            getTo->decrementCardinality();
+
+            if(getFrom->getCardinality()<1){
+                this->dcel->deleteVertex(getFrom);
+            }
+            if(getTo->getCardinality()<1){
+                this->dcel->deleteVertex(getTo);
+            }
+        }
+         //elimino la faccia
+         this -> dcel -> deleteFace(*iter);
     }
 }
