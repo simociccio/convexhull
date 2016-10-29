@@ -34,20 +34,16 @@ void convexhullCreator::hullcreator(){
 
     tethraCreation();
 
-    std::cout<<"debug";
 
     conflictgraph confg = conflictgraph(this->dcel,this->vectorPoint);
 
     confg.createGraph();
 
-    std::cout<<"debug";
-    int cont =0;
     for(int i=4; i<npoints; i++){
         std::list<Dcel::HalfEdge*> sortHorizon;
         std::set<Dcel::Face*>* setFace=confg.isVisibleByV(vectorPoint[i]);
 
         if(setFace->size()>0){
-            cont++;
 
             sortHorizon=setHorizon(setFace);
 
@@ -67,15 +63,11 @@ void convexhullCreator::hullcreator(){
                 std::set<Dcel::Vertex*>* vertexToIns=visibleVertex[*iter];
                 confg.updateCg(vertexToIns,newFace[j]);
             }
-            //this->dcel->update();
-            //mainWindow->updateGlCanvas();
-
 
        }
 
         confg.removeVertex(vectorPoint[i]);
         delete vectorPoint[i];
-
     }
 
 
@@ -90,29 +82,21 @@ void convexhullCreator::hullcreator(MainWindow* mainWindow){
 
     tethraCreation();
 
-    std::cout<<"debug";
-
     conflictgraph confg = conflictgraph(this->dcel,this->vectorPoint);
 
     confg.createGraph();
 
-    std::cout<<"debug";
-    int cont =0;
     for(int i=4; i<npoints; i++){
         std::list<Dcel::HalfEdge*> sortHorizon;
         std::set<Dcel::Face*>* setFace=confg.isVisibleByV(vectorPoint[i]);
 
         if(setFace->size()>0){
-            cont++;
 
             sortHorizon=setHorizon(setFace);
 
             std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> visibleVertex=confg.visibleVertexToTest(sortHorizon);
 
-
-
             Dcel::Vertex* currentV = dcel->addVertex(vectorPoint[i]->getCoordinate());
-
 
             std::deque<Dcel::Face*> newFace = addNewFace(sortHorizon,currentV);
             confg.removeFaces(setFace);
@@ -133,7 +117,6 @@ void convexhullCreator::hullcreator(MainWindow* mainWindow){
         delete vectorPoint[i];
 
     }
-
 
 }
 
@@ -342,14 +325,15 @@ std::list<Dcel::HalfEdge*> convexhullCreator::setHorizon(std::set<Dcel::Face*> *
     for(auto iter=faceList->begin();iter!=faceList->end();++iter){
         outerHe=(*iter)->getOuterHalfEdge();
         twin=outerHe->getTwin();
-        for(int i =0 ; i<3 ; i++){
+        auto iter1=outerHe;
+        do{
             if(faceList->count(twin->getFace())<1){
                 hev.push_back(twin);
              }
             outerHe = outerHe->getNext();
             twin=outerHe->getTwin();
 
-        }
+        }while(iter1!=outerHe);
 
     }
     return horizonSort(hev);

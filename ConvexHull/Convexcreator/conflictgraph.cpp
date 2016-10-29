@@ -25,8 +25,8 @@ conflictgraph::~conflictgraph(){
  */
 
 void conflictgraph::createGraph(){
-    Eigen::Matrix4d matrix;
 
+    Eigen::Matrix4d matrix;
 
     for(auto iter=dcel->faceBegin(); iter!=dcel->faceEnd();++iter){
 
@@ -38,10 +38,7 @@ void conflictgraph::createGraph(){
             matrix(i, 1) = (*vertexit)->getCoordinate().y();
             matrix(i, 2) = (*vertexit)->getCoordinate().z();
             matrix(i, 3) = 1;
-
-
         }
-
         for(int i=4;i<npoints;i++){
 
             matrix(3, 0) = vectorPoint[i]->getCoordinate().x();
@@ -54,12 +51,8 @@ void conflictgraph::createGraph(){
                 addFaceToVertexList(vectorPoint[i],(*iter));
                 addVertexToFaceList((*iter),vectorPoint[i]);
             }
-
-
         }
     }
-
-
 }
 /**
  * @brief conflictgraph::addFaceToVertexList()
@@ -73,17 +66,14 @@ void conflictgraph::addFaceToVertexList(Dcel::Vertex* vi, Dcel::Face* face){
     std::set<Dcel::Face*>* setf;
 
     if(maptoface.find(vi) != maptoface.end()){
-
         setf= maptoface[vi];
         setf->insert(face);
-    }
-    else{
+    }else{
         setf= new std::set<Dcel::Face*>();
         setf->insert(face);
         maptoface[vi]=setf;
 
     }
-
 }
 /**
  * @brief conflictgraph::addVertexToFaceList()
@@ -99,8 +89,7 @@ void conflictgraph::addVertexToFaceList(Dcel::Face* face, Dcel::Vertex* vi){
     if(maptover.find(face) != maptover.end()){
         setv= maptover[face];
         setv->insert(vi);
-    }
-    else{
+    }else{
         setv= new std::set<Dcel::Vertex*>();
         setv->insert(vi);
         maptover[face]=setv;
@@ -167,7 +156,6 @@ void conflictgraph::removeVertex(Dcel::Vertex* v){
  */
 
 void conflictgraph::removeFaces(std::set<Dcel::Face*> *setFaces){
-
     for(auto vit1 = setFaces->begin(); vit1 != setFaces->end(); ++vit1){
             std::set<Dcel::Vertex*> *visibleV = isVisibleByF(*vit1);
             if(visibleV!=nullptr){
