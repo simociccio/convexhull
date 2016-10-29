@@ -17,7 +17,7 @@ void conflictgraph::createGraph(){
 
         int i=0;
 
-        for(auto vertexit = (*iter)->incidentVertexBegin();i<3;++vertexit,i++){
+        for(auto vertexit = (*iter)->incidentVertexBegin();vertexit!=(*iter)->incidentVertexEnd();++vertexit,i++){
 
             matrix(i, 0) = (*vertexit)->getCoordinate().x();
             matrix(i, 1) = (*vertexit)->getCoordinate().y();
@@ -102,9 +102,9 @@ void conflictgraph::removeVertex(Dcel::Vertex* v){
     if(faceToR!=nullptr){
         maptoface.erase(v);
         for(auto iter= faceToR->begin();iter!=faceToR->end();++iter){
-            auto associatedSet = this->maptover[*iter];
-            if(associatedSet != nullptr){
-               associatedSet->erase(v);
+            auto mapOfElement = this->maptover[*iter];
+            if(mapOfElement != nullptr){
+               mapOfElement->erase(v);
             }
         }
     }
@@ -114,20 +114,16 @@ void conflictgraph::removeVertex(Dcel::Vertex* v){
 void conflictgraph::removeFaces(std::set<Dcel::Face*> *setFaces){
 
     for(auto vit1 = setFaces->begin(); vit1 != setFaces->end(); ++vit1){
-            std::set<Dcel::Vertex*> *visiblePoints = maptover[*vit1];
+            std::set<Dcel::Vertex*> *visibleP = maptover[*vit1];
 
-            //if the conflict list of the face exist,
-            //delete it from the map
-            if(visiblePoints != nullptr){
+            if(visibleP->size()!=0){
                 maptover.erase(*vit1);
 
-                //we have to delete the face from the conflict list of each vertex
-                //we iterate only on the vertices that see the face
-                for(auto vit2 = visiblePoints->begin(); vit2 != visiblePoints->end(); ++vit2){
+                for(auto vit2 = visibleP->begin(); vit2 != visibleP->end(); ++vit2){
 
-                    auto associatedSet = maptoface[*vit2];
-                    if(associatedSet != nullptr){
-                        associatedSet->erase(*vit1);
+                    auto mapOfElem = maptoface[*vit2];
+                    if(mapOfElem != nullptr){
+                        mapOfElem->erase(*vit1);
                     }
                 }
             }

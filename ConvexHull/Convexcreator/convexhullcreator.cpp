@@ -308,8 +308,9 @@ void convexhullCreator::setTwins(std::vector<Dcel::HalfEdge*> hen,std::vector<Dc
 }
 
 void convexhullCreator::findVertices(){
-    std::vector<Dcel::Vertex*>::iterator vectIt = vectorPoint.begin();
-        for(Dcel::VertexIterator vit = dcel->vertexBegin(); vit != dcel->vertexEnd(); ++vit,++vectIt){
+    //copio i punti in un altro vettore per evitare che i puntatori prendano vertici che non gli spettano
+    auto vectIt = vectorPoint.begin();
+        for(auto vit = dcel->vertexBegin(); vit != dcel->vertexEnd(); ++vit,++vectIt){
             *vectIt = new Dcel::Vertex(**vit);
         }
 }
