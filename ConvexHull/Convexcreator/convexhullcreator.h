@@ -13,6 +13,7 @@ public:
     convexhullCreator(DrawableDcel* dcel);
     void hullcreator(MainWindow *mainWindow);
     void hullcreator();
+    ~convexhullCreator();
 
 private:
     void findVertices();

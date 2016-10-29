@@ -13,6 +13,9 @@ convexhullCreator::convexhullCreator(DrawableDcel* dcel){
    this->vectorPoint=std::vector<Dcel::Vertex*>(npoints);
 
 }
+convexhullCreator::~convexhullCreator(){
+
+}
 
 void convexhullCreator::hullcreator(){
     findVertices();

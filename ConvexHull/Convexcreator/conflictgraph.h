@@ -12,6 +12,7 @@ class conflictgraph
 {
 public:
     conflictgraph(DrawableDcel* dcel, std::vector<Dcel::Vertex*> &vectorPoint);
+    ~conflictgraph();
     void addFaceToVertexList(Dcel::Vertex*, Dcel::Face*);
     void addVertexToFaceList(Dcel::Face*, Dcel::Vertex*);
     std::set<Dcel::Face*>* isVisibleByV(Dcel::Vertex*);

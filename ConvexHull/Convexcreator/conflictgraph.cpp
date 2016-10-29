@@ -9,6 +9,10 @@ conflictgraph::conflictgraph(DrawableDcel *dcel, std::vector<Dcel::Vertex*> &vec
     this->npoints=vectorPoint.size();
 
 }
+conflictgraph::~conflictgraph(){
+
+}
+
 void conflictgraph::createGraph(){
     Eigen::Matrix4d matrix;
 
@@ -59,6 +63,7 @@ void conflictgraph::addFaceToVertexList(Dcel::Vertex* vi, Dcel::Face* face){
         std::set<Dcel::Face*>* setf= new std::set<Dcel::Face*>();
         setf->insert(face);
         maptoface[vi]=setf;
+
     }
 
 }
@@ -98,13 +103,12 @@ std::set<Dcel::Face*>* conflictgraph::isVisibleByV(Dcel::Vertex *vertex){
 
 void conflictgraph::removeVertex(Dcel::Vertex* v){
 
-    std::set<Dcel::Face*> *faceToR = maptoface[v];
+    std::set<Dcel::Face*> *faceToR = isVisibleByV(v);
     if(faceToR!=nullptr){
         maptoface.erase(v);
         for(auto iter= faceToR->begin();iter!=faceToR->end();++iter){
-            auto mapOfElement = this->maptover[*iter];
-            if(mapOfElement != nullptr){
-               mapOfElement->erase(v);
+            if(isVisibleByF(*iter) != nullptr){
+               isVisibleByF(*iter)->erase(v);
             }
         }
     }
@@ -114,13 +118,11 @@ void conflictgraph::removeVertex(Dcel::Vertex* v){
 void conflictgraph::removeFaces(std::set<Dcel::Face*> *setFaces){
 
     for(auto vit1 = setFaces->begin(); vit1 != setFaces->end(); ++vit1){
-            std::set<Dcel::Vertex*> *visibleP = maptover[*vit1];
-
-            if(visibleP->size()!=0){
+            std::set<Dcel::Vertex*> *visibleV = isVisibleByF(*vit1);
+            if(visibleV!=nullptr){
                 maptover.erase(*vit1);
 
-                for(auto vit2 = visibleP->begin(); vit2 != visibleP->end(); ++vit2){
-
+                for(auto vit2 = visibleV->begin(); vit2 != visibleV->end(); ++vit2){
                     auto mapOfElem = maptoface[*vit2];
                     if(mapOfElem != nullptr){
                         mapOfElem->erase(*vit1);
@@ -149,13 +151,10 @@ Eigen::Matrix4d matrix;
     for(auto iter=vertex->begin();iter!=vertex->end();++iter){
         int i=0;
         for(auto vertexit = face->incidentVertexBegin();vertexit!=face->incidentVertexEnd();++vertexit,i++){
-
             matrix(i, 0) = (*vertexit)->getCoordinate().x();
             matrix(i, 1) = (*vertexit)->getCoordinate().y();
             matrix(i, 2) = (*vertexit)->getCoordinate().z();
             matrix(i, 3) = 1;
-
-
         }
         matrix(3, 0) = (*iter)->getCoordinate().x();
         matrix(3, 1) = (*iter)->getCoordinate().y();
