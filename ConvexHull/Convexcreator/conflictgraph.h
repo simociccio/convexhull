@@ -15,14 +15,14 @@ public:
     ~conflictgraph();
     void addFaceToVertexList(Dcel::Vertex*, Dcel::Face*);
     void addVertexToFaceList(Dcel::Face*, Dcel::Vertex*);
-    std::set<Dcel::Face*>* isVisibleByV(Dcel::Vertex*);
-    std::set<Dcel::Vertex*>* isVisibleByF(Dcel::Face*);
+    std::set<Dcel::Face*>* isVisibleByV(Dcel::Vertex*)const;
+    std::set<Dcel::Vertex*>* isVisibleByF(Dcel::Face*)const;
     void removeVertex(Dcel::Vertex*);
     void removeFaces(std::set<Dcel::Face*>*setFaces);
     void updateCg(std::set<Dcel::Vertex*> *,Dcel::Face* );
     std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> visibleVertexToTest(std::list<Dcel::HalfEdge *>);
 
-
+    //variables
     std::map<Dcel::Vertex*,std::set<Dcel::Face*>*> maptoface;
     std::map<Dcel::Face*,std::set<Dcel::Vertex*>*> maptover;
 

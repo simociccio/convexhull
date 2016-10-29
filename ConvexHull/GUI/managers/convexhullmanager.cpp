@@ -58,9 +58,14 @@ void ConvexHullManager::on_convexHullPushButton_clicked() {
             /********************************
              * Begin Convex Hull Algorithm  *
              ********************************/
-            convexhullCreator con_obj(dcel);
-            con_obj.hullcreator();
-
+            if(ui->showPhasesCheckBox->isChecked()){
+                convexhullCreator con_obj(dcel);
+                con_obj.hullcreator(mainWindow);
+            }
+            else{
+                convexhullCreator con_obj(dcel);
+                con_obj.hullcreator();
+            }
             /********************************
              * End Convex Hull Algorithm    *
              ********************************/

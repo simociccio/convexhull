@@ -9,9 +9,20 @@ conflictgraph::conflictgraph(DrawableDcel *dcel, std::vector<Dcel::Vertex*> &vec
     this->npoints=vectorPoint.size();
 
 }
+/**
+ * @brief conflictgraph::~conflictgraph()
+ * questo è il distruttore ella classe che viene
+ * richiamato una volta che la classe non viene
+ * piu' utilizzata
+ */
 conflictgraph::~conflictgraph(){
 
 }
+/**
+ * @brief conflictgraph::createGraph()
+ * questo metodo permette la creazione del
+ * grafo inserendo i vertici e le facce nelle 2 mappe
+ */
 
 void conflictgraph::createGraph(){
     Eigen::Matrix4d matrix;
@@ -47,51 +58,80 @@ void conflictgraph::createGraph(){
 
         }
     }
-    std::cout<<"debug";
 
 
 }
+/**
+ * @brief conflictgraph::addFaceToVertexList()
+ * aggiunge la faccia in corrispondenza di un determinato vertice
+ * nella mappa
+ * @param vi, vertice da usare come chiave nella mappa
+ *        face, faccia da aggiungere
+ */
 void conflictgraph::addFaceToVertexList(Dcel::Vertex* vi, Dcel::Face* face){
 
+    std::set<Dcel::Face*>* setf;
 
     if(maptoface.find(vi) != maptoface.end()){
 
-        std::set<Dcel::Face*>* setf= maptoface[vi];
+        setf= maptoface[vi];
         setf->insert(face);
     }
     else{
-        std::set<Dcel::Face*>* setf= new std::set<Dcel::Face*>();
+        setf= new std::set<Dcel::Face*>();
         setf->insert(face);
         maptoface[vi]=setf;
 
     }
 
 }
+/**
+ * @brief conflictgraph::addVertexToFaceList()
+ * aggiunge il vertice in corrispondenza di un determinata faccia
+ * nella mappa
+ * @param vi, vertice da inserire
+ *        face, faccia da usare come chiave nella mappa
+ */
+
 void conflictgraph::addVertexToFaceList(Dcel::Face* face, Dcel::Vertex* vi){
 
+    std::set<Dcel::Vertex*>* setv;
     if(maptover.find(face) != maptover.end()){
-        std::set<Dcel::Vertex*>* setv= maptover[face];
+        setv= maptover[face];
         setv->insert(vi);
     }
     else{
-        std::set<Dcel::Vertex*>* setv= new std::set<Dcel::Vertex*>();
+        setv= new std::set<Dcel::Vertex*>();
         setv->insert(vi);
         maptover[face]=setv;
     }
 
 }
+/**
+ * @brief conflictgraph::isVisibleByF()
+ * mi restituisce un set con i vertici visibili dalla faccia che gli passo in input
+ * @param face
+ */
 
-std::set<Dcel::Vertex*>* conflictgraph::isVisibleByF(Dcel::Face *face){
+std::set<Dcel::Vertex*>* conflictgraph::isVisibleByF(Dcel::Face *face)const{
+
 
     if(maptover.find(face)!=maptover.end()){
-            return new std::set<Dcel::Vertex*>(*maptover.at(face));
+         auto ver=  new std::set<Dcel::Vertex*>(*maptover.at(face));
+            return ver;
         }
         else{
-            return new std::set<Dcel::Vertex*>();
+         auto ver=  new std::set<Dcel::Vertex*>();
+            return ver;
         }
 }
+/**
+ * @brief conflictgraph::isVisibleByV()
+ * mi restituisce un set con le facce visibili dal vertice che gli passo in input
+ * @param vertex
+ */
 
-std::set<Dcel::Face*>* conflictgraph::isVisibleByV(Dcel::Vertex *vertex){
+std::set<Dcel::Face*>* conflictgraph::isVisibleByV(Dcel::Vertex *vertex)const{
 
         if(maptoface.find(vertex)!=maptoface.end()){
             return new std::set<Dcel::Face*>(*maptoface.at(vertex));
@@ -101,8 +141,13 @@ std::set<Dcel::Face*>* conflictgraph::isVisibleByV(Dcel::Vertex *vertex){
         }
 }
 
-void conflictgraph::removeVertex(Dcel::Vertex* v){
+/**
+ * @brief conflictgraph::removeVertex()
+ * rimuove il vertice dalla mappa dei vertici e elimina tutte le occorrenze di quel vertice nella mappa delle facce
+ * @param v
+ */
 
+void conflictgraph::removeVertex(Dcel::Vertex* v){
     std::set<Dcel::Face*> *faceToR = isVisibleByV(v);
     if(faceToR!=nullptr){
         maptoface.erase(v);
@@ -114,6 +159,12 @@ void conflictgraph::removeVertex(Dcel::Vertex* v){
     }
 
 }
+
+/**
+ * @brief conflictgraph::removeFaces()
+ * rimuove le facce dalla mappa e tutte le occorrenze della facce nella mappa dei vertici
+ * @param setFaces
+ */
 
 void conflictgraph::removeFaces(std::set<Dcel::Face*> *setFaces){
 
@@ -131,9 +182,16 @@ void conflictgraph::removeFaces(std::set<Dcel::Face*> *setFaces){
             }
         }
 }
+/**
+ * @brief conflictgraph::visibleVertexToTest()
+ * scorrendo l'orizzonte posso vedere tutti i vertici visibili si dalla faccia
+ * dell'halfedge che dalla faccia del twin. Dopo aver fatto questo li inserisco in una mappa
+ * che mi permette di avere per ogni halfedge il set di vertci visibili da esso
+ * @param listHoriz, la lista di halfedge dell'orizzonte
+ * @return mapHV: mappa halfedge set di vertici
+ */
 
 std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> conflictgraph::visibleVertexToTest(std::list<Dcel::HalfEdge*> listHoriz){
-
     std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> mapHV;
     for(auto iter = listHoriz.begin();iter!=listHoriz.end();++iter){
         std::set<Dcel::Vertex*> *confv=isVisibleByF((*iter)->getFace());
@@ -144,6 +202,13 @@ std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> conflictgraph::visibleVertex
     return mapHV;
 
 }
+/**
+ * @brief conflictgraph::visibleVertexToTest()
+ * scopro i vertici visibili in modo da poterli aggiungere nel conflictgraph
+ * @param vertex, set di vertici
+ *        face
+ */
+
 
 void conflictgraph::updateCg(std::set<Dcel::Vertex*> *vertex,Dcel::Face* face){
 

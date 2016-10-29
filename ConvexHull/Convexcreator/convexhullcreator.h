@@ -20,8 +20,8 @@ private:
     void randomfour();
     bool circleControll() const;
     void tethraCreation();
-    std::list<Dcel::HalfEdge *> horizonSort(std::list<Dcel::HalfEdge *>);
-    std::list<Dcel::HalfEdge*> setHorizon(std::set<Dcel::Face *> *);
+    std::list<Dcel::HalfEdge *> horizonSort(std::list<Dcel::HalfEdge *>)const;
+    std::list<Dcel::HalfEdge*> setHorizon(std::set<Dcel::Face *> *)const;
     void setTwins(std::vector<Dcel::HalfEdge*>,std::vector<Dcel::HalfEdge*>,int);
     std::deque<Dcel::Face*> addNewFace(std::list<Dcel::HalfEdge*>,Dcel::Vertex*);
     void delFacesVisib(std::set<Dcel::Face*>*);
