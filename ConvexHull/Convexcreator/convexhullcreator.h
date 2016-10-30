@@ -22,7 +22,7 @@ private:
     void tethraCreation();
     std::list<Dcel::HalfEdge *> horizonSort(std::list<Dcel::HalfEdge *>)const;
     std::list<Dcel::HalfEdge*> setHorizon(std::set<Dcel::Face *> *)const;
-    void setTwins(std::vector<Dcel::HalfEdge*>,std::vector<Dcel::HalfEdge*>,int);
+    void setTwins(std::deque<Dcel::HalfEdge*>,std::deque<Dcel::HalfEdge*>,int);
     std::deque<Dcel::Face*> addNewFace(std::list<Dcel::HalfEdge*>,Dcel::Vertex*);
     void delFacesVisib(std::set<Dcel::Face*>*);
 

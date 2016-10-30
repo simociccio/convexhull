@@ -62,12 +62,15 @@ void convexhullCreator::hullcreator(){
             for(auto iter=sortHorizon.begin();iter!=sortHorizon.end();++iter,j++){
                 std::set<Dcel::Vertex*>* vertexToIns=visibleVertex[*iter];
                 confg.updateCg(vertexToIns,newFace[j]);
+                delete visibleVertex[*iter];
             }
+
 
        }
 
         confg.removeVertex(vectorPoint[i]);
         delete vectorPoint[i];
+
     }
 
 
@@ -279,19 +282,20 @@ void convexhullCreator::tethraCreation(){
 
 std::deque<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>listHe,Dcel::Vertex* vi){
 
-    std::vector<Dcel::HalfEdge*> hen = std::vector<Dcel::HalfEdge*>(listHe.size());
-    std::vector<Dcel::HalfEdge*> hex = std::vector<Dcel::HalfEdge*>(listHe.size());
+    std::deque<Dcel::HalfEdge*> hen = std::deque<Dcel::HalfEdge*>(listHe.size());
+    std::deque<Dcel::HalfEdge*> hex = std::deque<Dcel::HalfEdge*>(listHe.size());
     std::deque<Dcel::Face*> faceDeq;
     int i=0;
     for(auto iter = listHe.begin(); iter != listHe.end(); ++iter,i++){
 
-        Dcel::HalfEdge* he1 = dcel->addHalfEdge();
-        Dcel::HalfEdge* he2 = dcel->addHalfEdge();
-        Dcel::HalfEdge* he3 = dcel->addHalfEdge();
-
         //uso l'he puntato da iter per salvarmi il vertice di partenza e arrivo
         Dcel::Vertex* v1 = (*iter)->getFromVertex();
         Dcel::Vertex* v2 = (*iter)->getToVertex();
+
+
+        Dcel::HalfEdge* he1 = dcel->addHalfEdge();
+        Dcel::HalfEdge* he2 = dcel->addHalfEdge();
+        Dcel::HalfEdge* he3 = dcel->addHalfEdge();
 
         //creazione faccia
         Dcel::Face* cf = dcel->addFace();
@@ -403,7 +407,7 @@ std::list<Dcel::HalfEdge*> convexhullCreator::horizonSort(std::list<Dcel::HalfEd
  * modo che l'ultimo he punti al primo
  * @param vector di he in ingresso, vector di he in uscita, intero
  */
-void convexhullCreator::setTwins(std::vector<Dcel::HalfEdge*> hen,std::vector<Dcel::HalfEdge*> hex,int i){
+void convexhullCreator::setTwins(std::deque<Dcel::HalfEdge*> hen,std::deque<Dcel::HalfEdge*> hex,int i){
     int j;
     for(j=0;j<i-1;j++){
         hen[j]->setTwin(hex[j+1]);
