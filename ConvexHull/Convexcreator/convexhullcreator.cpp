@@ -202,10 +202,34 @@ void convexhullCreator::tethraCreation(){
 
     //controllo la norma per settare il senso di percorrenza della faccia
     if(circleControll()){
-        Dcel::Vertex* var = v3;
-        v3 = v1;
-        v1 = var;
-    }
+        he1->setFromVertex(v3);
+        he1->setToVertex(v2);
+        he1->setNext(he2);
+        he1->setPrev(he3);
+        v3->setIncidentHalfEdge(he1);
+        v3->incrementCardinality();
+        v2->incrementCardinality();
+        he1->setFace(f1);
+
+
+        he2->setFromVertex(v2);
+        he2->setToVertex(v1);
+        he2->setNext(he3);
+        he2->setPrev(he1);
+        v2->setIncidentHalfEdge(he2);
+        v2->incrementCardinality();
+        v1->incrementCardinality();
+        he2->setFace(f1);
+
+        he3->setFromVertex(v1);
+        he3->setToVertex(v3);
+        he3->setNext(he1);
+        he3->setPrev(he2);
+        v1->setIncidentHalfEdge(he3);
+        v1->incrementCardinality();
+        v3->incrementCardinality();
+        he3->setFace(f1);
+    }else{
         he1->setFromVertex(v1);
         he1->setToVertex(v2);
         he1->setNext(he2);
@@ -225,8 +249,6 @@ void convexhullCreator::tethraCreation(){
         v3->incrementCardinality();
         he2->setFace(f1);
 
-
-
         he3->setFromVertex(v3);
         he3->setToVertex(v1);
         he3->setNext(he1);
@@ -235,7 +257,7 @@ void convexhullCreator::tethraCreation(){
         v3->incrementCardinality();
         v1->incrementCardinality();
         he3->setFace(f1);
-
+        }
         std::list<Dcel::HalfEdge*> listHe;
 
         //aggiungo gli he alla lista
@@ -268,40 +290,40 @@ std::deque<Dcel::Face*> convexhullCreator::addNewFace(std::list<Dcel::HalfEdge*>
         Dcel::HalfEdge* he3 = dcel->addHalfEdge();
 
         //uso l'he puntato da iter per salvarmi il vertice di partenza e arrivo
-        Dcel::Vertex* v1 = (*iter)->getToVertex();
-        Dcel::Vertex* v2 = (*iter)->getFromVertex();
+        Dcel::Vertex* v1 = (*iter)->getFromVertex();
+        Dcel::Vertex* v2 = (*iter)->getToVertex();
 
         //creazione faccia
         Dcel::Face* cf = dcel->addFace();
         faceDeq.push_back(cf);
         cf->setOuterHalfEdge(he1);
-        he1->setFromVertex(v1);
-        he1->setToVertex(v2);
+        he1->setFromVertex(v2);
+        he1->setToVertex(v1);
         he1->setNext(he2);
         he1->setPrev(he3);
         he1->setTwin(*iter);
         (*iter)->setTwin(he1);
-        v1->setIncidentHalfEdge(he1);
-        v1->incrementCardinality();
+        v2->setIncidentHalfEdge(he1);
         v2->incrementCardinality();
+        v1->incrementCardinality();
         he1->setFace(cf);
 
-        he2->setFromVertex(v2);
+        he2->setFromVertex(v1);
         he2->setToVertex(vi);
         he2->setNext(he3);
         he2->setPrev(he1);
-        v2->setIncidentHalfEdge(he2);
-        v2->incrementCardinality();
+        v1->setIncidentHalfEdge(he2);
+        v1->incrementCardinality();
         vi->incrementCardinality();
         he2->setFace(cf);
 
         he3->setFromVertex(vi);
-        he3->setToVertex(v1);
+        he3->setToVertex(v2);
         he3->setNext(he1);
         he3->setPrev(he2);
         vi->setIncidentHalfEdge(he3);
         vi->incrementCardinality();
-        v1->incrementCardinality();
+        v2->incrementCardinality();
         he3->setFace(cf);
         hen[i]=he3;
         hex[i]=he2;
