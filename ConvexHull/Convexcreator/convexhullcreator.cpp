@@ -46,14 +46,8 @@ void convexhullCreator::hullcreator(){
         if(setFace->size()>0){
 
             sortHorizon=setHorizon(setFace);
-
             std::map<Dcel::HalfEdge*, std::set<Dcel::Vertex*>*> visibleVertex=confg.visibleVertexToTest(sortHorizon);
-
-
-
             Dcel::Vertex* currentV = dcel->addVertex(vectorPoint[i]->getCoordinate());
-
-
             std::deque<Dcel::Face*> newFace = addNewFace(sortHorizon,currentV);
             confg.removeFaces(setFace);
             delFacesVisib(setFace);
@@ -63,17 +57,16 @@ void convexhullCreator::hullcreator(){
                 std::set<Dcel::Vertex*>* vertexToIns=visibleVertex[*iter];
                 confg.updateCg(vertexToIns,newFace[j]);
                 delete visibleVertex[*iter];
-            }
 
+            }
 
        }
 
         confg.removeVertex(vectorPoint[i]);
         delete vectorPoint[i];
 
+
     }
-
-
 }
 
 void convexhullCreator::hullcreator(MainWindow* mainWindow){
@@ -109,7 +102,10 @@ void convexhullCreator::hullcreator(MainWindow* mainWindow){
             for(auto iter=sortHorizon.begin();iter!=sortHorizon.end();++iter,j++){
                 std::set<Dcel::Vertex*>* vertexToIns=visibleVertex[*iter];
                 confg.updateCg(vertexToIns,newFace[j]);
+                delete visibleVertex[*iter];
+
             }
+
             this->dcel->update();
             mainWindow->updateGlCanvas();
 
